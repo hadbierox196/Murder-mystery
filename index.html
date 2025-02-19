@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murder Mystery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #FFD700;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #FFD700;
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .role-card {
+            background-color: #222;
+            border: 2px solid #FFD700;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .role-card.selected {
+            background-color: #FFD700;
+            color: #000;
+        }
+
+        .role-card.selected:hover {
+            transform: none;
+            cursor: default;
+        }
+
+        .player-name {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .animation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 215, 0, 0.2);
+            display: none;
+        }
+
+        .reset-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .flashing {
+            animation: flash 0.5s ease-in-out 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Murder Mystery </h1>
+        <div class="role-grid" id="roleGrid"></div>
+        <button class="reset-button" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        const roles = [
+            'Killed',
+            'Last Seen',
+            'Detective',
+            'Suspect 1',
+            'Suspect 2',
+            'Suspect 3',
+            'Arrested',
+            'Killer',
+            'Snitch',
+            'Judge'
+        ];
+
+        // This array would be populated with actual player names
+        const players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 
+                        'Player 6', 'Player 7', 'Player 8', 'Player 9', 'Player 10'];
+        
+        let assignments = {};
+        let availablePlayers = [...players];
+
+        function createRoleCards() {
+            const roleGrid = document.getElementById('roleGrid');
+            roleGrid.innerHTML = '';
+
+            roles.forEach(role => {
+                const card = document.createElement('div');
+                card.className = 'role-card';
+                card.onclick = () => assignRandomPlayer(role, card);
+                
+                const roleName = document.createElement('div');
+                roleName.textContent = role;
+                card.appendChild(roleName);
+
+                if (assignments[role]) {
+                    const playerName = document.createElement('div');
+                    playerName.className = 'player-name';
+                    playerName.textContent = assignments[role];
+                    card.classList.add('selected');
+                    card.appendChild(playerName);
+                }
+
+                const animationOverlay = document.createElement('div');
+                animationOverlay.className = 'animation-overlay';
+                card.appendChild(animationOverlay);
+
+                roleGrid.appendChild(card);
+            });
+        }
+
+        function assignRandomPlayer(role, card) {
+            if (assignments[role] || availablePlayers.length === 0) return;
+
+            // Add flashing animation
+            card.querySelector('.animation-overlay').style.display = 'block';
+            card.classList.add('flashing');
+
+            // Delay the assignment to show animation
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * availablePlayers.length);
+                const selectedPlayer = availablePlayers[randomIndex];
+                
+                assignments[role] = selectedPlayer;
+                availablePlayers.splice(randomIndex, 1);
+                
+                // Remove animation and update card
+                card.classList.remove('flashing');
+                card.querySelector('.animation-overlay').style.display = 'none';
+                
+                createRoleCards();
+            }, 1500); // Animation duration
+        }
+
+        function resetGame() {
+            assignments = {};
+            availablePlayers = [...players];
+            createRoleCards();
+        }
+
+        // Initialize the game
+        createRoleCards();
+    </script>
+</body>
+</html>
